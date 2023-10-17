@@ -6,7 +6,7 @@
 /*   By: hyowchoi <hyowchoi@student.42seoul.kr>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/16 13:32:35 by hyowchoi          #+#    #+#             */
-/*   Updated: 2023/10/17 18:31:18 by hyowchoi         ###   ########.fr       */
+/*   Updated: 2023/10/17 20:07:04 by hyowchoi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,7 @@ t_list	*find_or_make_lst(t_list *ans, int fd)
 	if (!node)
 		return (0);
 	node->content = 0;
+	node->ans = 0;
 	node->fd = fd;
 	node->fill = 0;
 	node->size = 1;

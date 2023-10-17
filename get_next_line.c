@@ -6,7 +6,7 @@
 /*   By: hyowchoi <hyowchoi@student.42seoul.kr>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/16 13:32:19 by hyowchoi          #+#    #+#             */
-/*   Updated: 2023/10/17 18:28:41 by hyowchoi         ###   ########.fr       */
+/*   Updated: 2023/10/17 20:27:58 by hyowchoi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ int	alloc(t_list **node, char *buff, size_t buf_len)
 		while (++idx < (*node)->fill)
 			str[idx] = ((*node)->content)[idx];
 		(*node)->content = str;
-		free(*node);
+		free((*node)->content);
 	}
 	idx = -1;
 	while (++idx < buf_len)
@@ -36,36 +36,48 @@ int	alloc(t_list **node, char *buff, size_t buf_len)
 	return (1);
 }
 
-char	*ft_free(t_list *ans, char *buff)
+char	*ft_free(t_list *ans)
 {
 	lstfree(&ans);
-	free(buff);
 	return (0);
 }
 
-size_t	find_endl(char *str, size_t len)
+ssize_t	find_endl(t_list *node)
 {
 	size_t	idx;
+	size_t	i;
 
 	idx = 0;
-	while (idx < len)
+	i = 0;
+	while (idx < node->fill)
 	{
-		if (str[idx] == '\n')
-			return (idx + 1);
+		if ((node->content)[idx] == '\n')
+			break ;
 	}
-	return (len);
+	node->content = (char *)malloc(sizeof(char) * idx);
+	if (!node->content)
+		return (-1);
+	i = -1;
+	while (++i <= idx)
+		(node->ans)[idx] = (node->content)[idx];
+	i = 1;
+	while (idx + i < node->fill)
+	{
+		(node->content)[i] = (node->content)[idx + i];
+		i++;
+	}
+	node->fill = (node->fill) - idx - 1;
+	return (0);
 }
-
+// 012345\n6789
 char	*get_next_line(int fd)
 {
-	char			*buff;
+	char			buff[BUFFER_SIZE];
 	static t_list	*ans;
 	t_list			*node;
 	ssize_t			val_read;
-	size_t			str_len;
 
-	buff = (char *)malloc(BUFFER_SIZE * sizeof(char));
-	if (!buff)
+	if (fd < 0 || fd == 2)
 		return (0);
 	node = find_or_make_lst(ans, fd);
 	if (!node)
@@ -74,10 +86,13 @@ char	*get_next_line(int fd)
 	{
 		val_read = read(fd, buff, BUFFER_SIZE);
 		if (val_read < 0)
-			return (ft_free(ans, buff));
-		str_len = find_endl(buff, val_read);
-		if (alloc(&node, buff, str_len) < 0)
-			return (ft_free(ans, buff));
+			return (ft_free(ans));
+		if (alloc(&node, buff, BUFFER_SIZE) < 0)
+			return (ft_free(ans));
+		if (0 < find_endl(node))
+			return (node->ans);
 	}
-	return (node->content);
+	if (alloc(&node, buff, BUFFER_SIZE) < 0)
+		return (ft_free(ans));
+	return (node->ans);
 }
