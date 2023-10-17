@@ -6,7 +6,7 @@
 /*   By: hyowchoi <hyowchoi@student.42seoul.kr>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/16 13:32:19 by hyowchoi          #+#    #+#             */
-/*   Updated: 2023/10/17 20:27:58 by hyowchoi         ###   ########.fr       */
+/*   Updated: 2023/10/17 20:32:58 by hyowchoi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,7 +77,7 @@ char	*get_next_line(int fd)
 	t_list			*node;
 	ssize_t			val_read;
 
-	if (fd < 0 || fd == 2)
+	if (fd < 0 || fd == 2 || read(fd, NULL, 0) < 0)
 		return (0);
 	node = find_or_make_lst(ans, fd);
 	if (!node)
