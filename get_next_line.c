@@ -6,66 +6,78 @@
 /*   By: hyowchoi <hyowchoi@student.42seoul.kr>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/16 13:32:19 by hyowchoi          #+#    #+#             */
-/*   Updated: 2023/10/17 14:22:32 by hyowchoi         ###   ########.fr       */
+/*   Updated: 2023/10/17 18:28:41 by hyowchoi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-void	*ft_calloc(size_t count, size_t size)
+int	alloc(t_list **node, char *buff, size_t buf_len)
 {
-	char	*c;
-	size_t	i;
+	char	*str;
+	size_t	idx;
 
-	i = 0;
-	if (size && count > (size_t)(-1) / size)
-		return (NULL);
-	c = (char *)malloc(count * size);
-	if (c == NULL)
-		return (NULL);
-	while (i < count * size)
+	if ((*node)->size < (*node)->fill + buf_len)
 	{
-		c[i] = 0;
-		i++;
+		(*node)->size *= 2;
+		str = (char *)malloc((*node)->size);
+		if (str == NULL)
+			return (-1);
+		idx = -1;
+		while (++idx < (*node)->fill)
+			str[idx] = ((*node)->content)[idx];
+		(*node)->content = str;
+		free(*node);
 	}
-	return ((void *)c);
+	idx = -1;
+	while (++idx < buf_len)
+		str[(*node)->fill + idx] = buff[idx];
+	(*node)->fill += buf_len;
+	return (1);
 }
 
-char	*ft_free(char *buff)
+char	*ft_free(t_list *ans, char *buff)
 {
+	lstfree(&ans);
 	free(buff);
 	return (0);
 }
 
-unsigned int	find_endl(char *str, ssize_t len)
+size_t	find_endl(char *str, size_t len)
 {
-	ssize_t	idx;
+	size_t	idx;
 
 	idx = 0;
 	while (idx < len)
 	{
 		if (str[idx] == '\n')
-			return (idx + 1); // \n 문자 자리 포함
+			return (idx + 1);
 	}
 	return (len);
 }
 
 char	*get_next_line(int fd)
 {
-	char	*buff;
-	char	*ans;
-	ssize_t	val_read;
-	ssize_t	endl_loc;
+	char			*buff;
+	static t_list	*ans;
+	t_list			*node;
+	ssize_t			val_read;
+	size_t			str_len;
 
-	buff = ft_calloc(BUFFER_SIZE, sizeof(char));
+	buff = (char *)malloc(BUFFER_SIZE * sizeof(char));
 	if (!buff)
+		return (0);
+	node = find_or_make_lst(ans, fd);
+	if (!node)
 		return (0);
 	while (1)
 	{
 		val_read = read(fd, buff, BUFFER_SIZE);
 		if (val_read < 0)
-			return (ft_free(buff));
-		endl_loc = find_endl(buff, val_read);
+			return (ft_free(ans, buff));
+		str_len = find_endl(buff, val_read);
+		if (alloc(&node, buff, str_len) < 0)
+			return (ft_free(ans, buff));
 	}
-	return (buff);
+	return (node->content);
 }

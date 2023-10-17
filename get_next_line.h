@@ -6,7 +6,7 @@
 /*   By: hyowchoi <hyowchoi@student.42seoul.kr>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/16 13:32:49 by hyowchoi          #+#    #+#             */
-/*   Updated: 2023/10/17 14:30:09 by hyowchoi         ###   ########.fr       */
+/*   Updated: 2023/10/17 18:27:42 by hyowchoi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,11 +18,19 @@
 
 typedef struct s_list
 {
-	void			*content;
+	char			*content;
 	int				fd;
+	unsigned int	fill;
+	unsigned int	size;
 	struct s_list	*next;
 }	t_list;
 
 char	*get_next_line(int fd);
+size_t	find_endl(char *str, size_t len);
+char	*ft_free(t_list *ans, char *buff);
+int		alloc(t_list **node, char *buff, size_t buf_len);
 
+void	ft_lstadd_back(t_list **lst, t_list *new);
+t_list	*find_or_make_lst(t_list *ans, int fd);
+void	lstfree(t_list **lst);
 #endif
