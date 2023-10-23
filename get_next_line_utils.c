@@ -6,11 +6,57 @@
 /*   By: hyowchoi <hyowchoi@student.42seoul.kr>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/16 13:32:35 by hyowchoi          #+#    #+#             */
-/*   Updated: 2023/10/17 20:07:04 by hyowchoi         ###   ########.fr       */
+/*   Updated: 2023/10/23 16:15:40 by hyowchoi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
+
+t_list	*find_or_make_lst(t_list *root, int fd, size_t buf_size)
+{
+	t_list	*node;
+
+	node = root;
+	while (node)
+	{
+		if (node->fd == fd)
+			return (node);
+		node = node->next;
+	}
+	node = (t_list *)malloc(1 * sizeof(t_list));
+	if (!node)
+		return (0);
+	if (!init_node(node, fd, buf_size))
+	{
+		free(node);
+		return (0);
+	}
+	ft_lstadd_back(&root, node);
+	return (node);
+}
+
+int	init_node(t_list *node, int fd, size_t buf_size)
+{
+	char	*str1;
+	char	*str2;
+
+	str1 = (char *)malloc(sizeof(buf_size));
+	if (!str1)
+		return (0);
+	str2 = (char *)malloc(sizeof(buf_size));
+	if (!str2)
+	{
+		free(str1);
+		return (0);
+	}
+	node->content = str1;
+	node->ans = str2;
+	node->fd = fd;
+	node->fill = 0;
+	node->con_size = buf_size;
+	node->next = 0;
+	return (1);
+}
 
 void	ft_lstadd_back(t_list **lst, t_list *new)
 {
@@ -27,42 +73,22 @@ void	ft_lstadd_back(t_list **lst, t_list *new)
 	p->next = new;
 }
 
-t_list	*find_or_make_lst(t_list *ans, int fd)
+int	list_free_and_connect(t_list **lst, int fd)
 {
-	t_list	*node;
+	t_list	*now;
+	t_list	*bef;
 
-	while (ans)
+	now = *lst;
+	while (now->next)
 	{
-		if (ans->fd == fd)
-			return (ans);
-		ans = ans->next;
+		bef = now;
+		now = now->next;
+		if (now->fd == fd)
+			break ;
 	}
-	node = (t_list *)malloc(sizeof(t_list));
-	if (!node)
-		return (0);
-	node->content = 0;
-	node->ans = 0;
-	node->fd = fd;
-	node->fill = 0;
-	node->size = 1;
-	node->next = 0;
-	ft_lstadd_back(&ans, node);
-	return (node);
-}
-
-void	lstfree(t_list **lst)
-{
-	t_list	*node_next;
-	t_list	*node_free;
-
-	node_next = *lst;
-	while (node_next)
-	{
-		node_free = node_next;
-		node_next = node_next->next;
-		free(node_free->content);
-		free(node_free);
-	}
-	free(node_next->content);
-	free(node_next);
+	bef->next = now->next;
+	free(now->content);
+	free(now->ans);
+	free(now);
+	return (0);
 }

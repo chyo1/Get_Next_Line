@@ -6,93 +6,106 @@
 /*   By: hyowchoi <hyowchoi@student.42seoul.kr>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/16 13:32:19 by hyowchoi          #+#    #+#             */
-/*   Updated: 2023/10/17 20:32:58 by hyowchoi         ###   ########.fr       */
+/*   Updated: 2023/10/23 16:36:42 by hyowchoi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-int	alloc(t_list **node, char *buff, size_t buf_len)
+int	alloc(t_list *node, char *buff, size_t buf_len)
 {
 	char	*str;
-	size_t	idx;
+	size_t	cnt;
 
-	if ((*node)->size < (*node)->fill + buf_len)
+	cnt = -1;
+	if (node->con_size < node->fill + buf_len)
 	{
-		(*node)->size *= 2;
-		str = (char *)malloc((*node)->size);
-		if (str == NULL)
-			return (-1);
-		idx = -1;
-		while (++idx < (*node)->fill)
-			str[idx] = ((*node)->content)[idx];
-		(*node)->content = str;
-		free((*node)->content);
+		node->con_size *= 2;
+		str = (char *)malloc(sizeof(char) * node->con_size);
+		if (!str)
+			return (0);
+		while (++cnt < node->fill)
+			str[cnt] = (node->content)[cnt];
+		cnt = -1;
+		while (++cnt < buf_len)
+			str[node->fill + cnt] = buff[cnt];
+		free(node->content);
+		node->content = str;
 	}
-	idx = -1;
-	while (++idx < buf_len)
-		str[(*node)->fill + idx] = buff[idx];
-	(*node)->fill += buf_len;
+	else
+	{
+		while (++cnt < buf_len)
+			(node->content)[node->fill + cnt] = buff[cnt];
+	}
+	node->fill += buf_len;
 	return (1);
 }
 
-char	*ft_free(t_list *ans)
+size_t	find_endl(t_list	*node)
 {
-	lstfree(&ans);
-	return (0);
+	size_t	len;
+
+	len = 0;
+	while (len < node->fill)
+	{
+		if ((node->content)[len] == '\n')
+			return (len + 1);
+		len++;
+	}
+	return (node->fill);
 }
 
-ssize_t	find_endl(t_list *node)
+char	*get_ans(t_list	*node)
 {
 	size_t	idx;
-	size_t	i;
+	char	*str;
+	size_t	len;
 
+	len = find_endl(node);
+	str = (char *)malloc(sizeof(char) * len);
+	if (!str)
+		return (0);
+	idx = -1;
+	while (++idx < len)
+		str[idx] = (node->content)[idx];
+	free(node->ans);
+	node->ans = str;
 	idx = 0;
-	i = 0;
-	while (idx < node->fill)
-	{
-		if ((node->content)[idx] == '\n')
-			break ;
-	}
-	node->content = (char *)malloc(sizeof(char) * idx);
-	if (!node->content)
-		return (-1);
-	i = -1;
-	while (++i <= idx)
-		(node->ans)[idx] = (node->content)[idx];
-	i = 1;
-	while (idx + i < node->fill)
-	{
-		(node->content)[i] = (node->content)[idx + i];
+	while (len + idx < node->fill)
+		node->content[idx] = node->content[len + idx];
+	node->fill = (node->fill) - len;
+
+	printf("ans : ");
+	size_t i = 0;
+	while ((node->ans)[i]){
+		printf("%d ", (node->ans)[i]);
 		i++;
 	}
-	node->fill = (node->fill) - idx - 1;
-	return (0);
+	return (node->ans);
 }
-// 012345\n6789
+
 char	*get_next_line(int fd)
 {
 	char			buff[BUFFER_SIZE];
-	static t_list	*ans;
+	ssize_t			len;
+	static t_list	*root;
 	t_list			*node;
-	ssize_t			val_read;
 
-	if (fd < 0 || fd == 2 || read(fd, NULL, 0) < 0)
-		return (0);
-	node = find_or_make_lst(ans, fd);
-	if (!node)
+	if (fd < 0 || fd == 2)
 		return (0);
 	while (1)
 	{
-		val_read = read(fd, buff, BUFFER_SIZE);
-		if (val_read < 0)
-			return (ft_free(ans));
-		if (alloc(&node, buff, BUFFER_SIZE) < 0)
-			return (ft_free(ans));
-		if (0 < find_endl(node))
-			return (node->ans);
+		len = read(fd, buff, BUFFER_SIZE);
+		if (len <= 0)
+			return (0);
+		node = find_or_make_lst(root, fd, BUFFER_SIZE);
+		if (!node)
+			return (0);
+		if (!alloc(node, buff, len) || !get_ans(node))
+		{
+			list_free_and_connect(&root, fd);
+			return (0);
+		}
 	}
-	if (alloc(&node, buff, BUFFER_SIZE) < 0)
-		return (ft_free(ans));
 	return (node->ans);
 }
