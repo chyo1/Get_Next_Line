@@ -6,12 +6,16 @@
 /*   By: hyowchoi <hyowchoi@student.42seoul.kr>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/16 13:32:49 by hyowchoi          #+#    #+#             */
-/*   Updated: 2023/10/23 16:16:07 by hyowchoi         ###   ########.fr       */
+/*   Updated: 2023/10/23 17:23:47 by hyowchoi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef GET_NEXT_LINE_H
 # define GET_NEXT_LINE_H
+
+# ifndef BUFFER_SIZE
+#  define BUFFER_SIZE 2048
+# endif
 
 # include <stdlib.h>
 # include <unistd.h>
@@ -24,6 +28,7 @@ typedef struct s_list
 	int				fd;
 	size_t			fill;
 	size_t			con_size;
+	int				flag;
 	struct s_list	*next;
 }	t_list;
 

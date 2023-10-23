@@ -6,7 +6,7 @@
 /*   By: hyowchoi <hyowchoi@student.42seoul.kr>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/16 13:32:35 by hyowchoi          #+#    #+#             */
-/*   Updated: 2023/10/23 16:15:40 by hyowchoi         ###   ########.fr       */
+/*   Updated: 2023/10/23 17:41:32 by hyowchoi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,11 +17,11 @@ t_list	*find_or_make_lst(t_list *root, int fd, size_t buf_size)
 	t_list	*node;
 
 	node = root;
-	while (node)
+	while (root)
 	{
-		if (node->fd == fd)
-			return (node);
-		node = node->next;
+		if (root->fd == fd)
+			return (root);
+		root = root->next;
 	}
 	node = (t_list *)malloc(1 * sizeof(t_list));
 	if (!node)
@@ -53,6 +53,7 @@ int	init_node(t_list *node, int fd, size_t buf_size)
 	node->ans = str2;
 	node->fd = fd;
 	node->fill = 0;
+	node->flag = 0;
 	node->con_size = buf_size;
 	node->next = 0;
 	return (1);

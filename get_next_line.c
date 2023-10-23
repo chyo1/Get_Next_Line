@@ -6,7 +6,7 @@
 /*   By: hyowchoi <hyowchoi@student.42seoul.kr>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/16 13:32:19 by hyowchoi          #+#    #+#             */
-/*   Updated: 2023/10/23 16:36:42 by hyowchoi         ###   ########.fr       */
+/*   Updated: 2023/10/23 17:45:24 by hyowchoi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,10 @@ size_t	find_endl(t_list	*node)
 	while (len < node->fill)
 	{
 		if ((node->content)[len] == '\n')
+		{
+			node->flag = 1;
 			return (len + 1);
+		}
 		len++;
 	}
 	return (node->fill);
@@ -72,15 +75,11 @@ char	*get_ans(t_list	*node)
 	node->ans = str;
 	idx = 0;
 	while (len + idx < node->fill)
+	{
 		node->content[idx] = node->content[len + idx];
-	node->fill = (node->fill) - len;
-
-	printf("ans : ");
-	size_t i = 0;
-	while ((node->ans)[i]){
-		printf("%d ", (node->ans)[i]);
-		i++;
+		idx++;
 	}
+	node->fill = (node->fill) - len;
 	return (node->ans);
 }
 
@@ -93,19 +92,42 @@ char	*get_next_line(int fd)
 
 	if (fd < 0 || fd == 2)
 		return (0);
+	node = find_or_make_lst(root, fd, BUFFER_SIZE);
+	if (!node)
+		return (0);
 	while (1)
 	{
 		len = read(fd, buff, BUFFER_SIZE);
 		if (len <= 0)
-			return (0);
-		node = find_or_make_lst(root, fd, BUFFER_SIZE);
-		if (!node)
-			return (0);
+			break ;
 		if (!alloc(node, buff, len) || !get_ans(node))
-		{
-			list_free_and_connect(&root, fd);
-			return (0);
-		}
+			break ;
+		if (len != BUFFER_SIZE || node->flag)
+			return (node->ans);
 	}
-	return (node->ans);
+	list_free_and_connect(&root, fd);
+	return (0);
 }
+
+// #include <fcntl.h>
+
+// int main()
+// {
+// 	int fd = open("text.txt", O_RDONLY);
+
+// 	printf("%s", get_next_line(fd));
+// 	printf("%s", get_next_line(fd));
+// 	printf("%s", get_next_line(fd));
+// 	printf("%s", get_next_line(fd));
+// 	printf("%s", get_next_line(fd));
+// 	printf("%s", get_next_line(fd));
+// 	printf("%s", get_next_line(fd));
+// 	printf("%s", get_next_line(fd));
+// 	printf("%s", get_next_line(fd));
+// 	printf("%s", get_next_line(fd));
+// 	printf("%s", get_next_line(fd));
+// 	printf("%s", get_next_line(fd));
+// 	printf("%s", get_next_line(fd));
+// 	printf("%s", get_next_line(fd));
+// 	return (0);
+// }
