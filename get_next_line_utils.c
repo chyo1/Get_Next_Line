@@ -6,7 +6,7 @@
 /*   By: hyowchoi <hyowchoi@student.42seoul.kr>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/16 13:32:35 by hyowchoi          #+#    #+#             */
-/*   Updated: 2023/10/23 17:41:32 by hyowchoi         ###   ########.fr       */
+/*   Updated: 2023/10/23 18:10:48 by hyowchoi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,18 +76,19 @@ void	ft_lstadd_back(t_list **lst, t_list *new)
 
 int	list_free_and_connect(t_list **lst, int fd)
 {
-	t_list	*now;
 	t_list	*bef;
+	t_list	*now;
 
+	bef = *lst;
 	now = *lst;
-	while (now->next)
+
+	while (now->fd != fd)
 	{
 		bef = now;
 		now = now->next;
-		if (now->fd == fd)
-			break ;
 	}
-	bef->next = now->next;
+	if (bef != now)
+		bef->next = now->next;
 	free(now->content);
 	free(now->ans);
 	free(now);
