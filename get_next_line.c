@@ -6,7 +6,7 @@
 /*   By: hyowchoi <hyowchoi@student.42seoul.kr>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/16 13:32:19 by hyowchoi          #+#    #+#             */
-/*   Updated: 2023/10/25 18:54:41 by hyowchoi         ###   ########.fr       */
+/*   Updated: 2023/10/25 19:37:50 by hyowchoi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,6 +63,7 @@ int	cpy_buff(t_list **node, char *buff, ssize_t cnt)
 	idx = 0;
 	if ((*node)->size < (*node)->len + cnt)
 	{
+		(*node)->size = (*node)->len + cnt;
 		(*node)->size *= 2;
 		tmp = (char *)malloc(sizeof(char) * (*node)->size);
 		if (!tmp)
@@ -84,7 +85,7 @@ int	cpy_buff(t_list **node, char *buff, ssize_t cnt)
 	idx = 0;
 	while (idx < cnt)
 	{
-		(*node)->str[(*node)->len + idx] = buff[idx];
+		(*node)->str[(*node)->len + idx] = buff[idx]; //
 		idx++;
 	}
 	(*node)->len += cnt;
@@ -112,7 +113,7 @@ char	*get_ans(t_list **node)
 		ans[idx] = (*node)->str[idx];
 	ans[idx] = '\0';
 	tmp = (char *)malloc(sizeof(char) * ((*node)->len - (*node)->loc));
-	(*node)->size = (*node)->len - (*node)->loc + 1; // 
+	(*node)->size = (*node)->len - (*node)->loc; // 
 	if (!tmp)
 	{
 		free((*node)->str);
@@ -169,17 +170,17 @@ char	*get_next_line(int fd)
 	return (get_ans(&root));
 }
 
-int main()
-{
-	int fd = open("test.txt", O_RDONLY);
+// int main()
+// {
+// 	int fd = open("test.txt", O_RDONLY);
 
-	printf("%s", get_next_line(fd));
-	printf("%s", get_next_line(fd));
-	printf("%s", get_next_line(fd));
-	printf("%s", get_next_line(fd));
-	printf("%s", get_next_line(fd));
-	printf("%s", get_next_line(fd));
-	printf("%s", get_next_line(fd));
-	printf("%s", get_next_line(fd));
-	return (0);
-}
+// 	printf("%s", get_next_line(fd));
+// 	printf("%s", get_next_line(fd));
+// 	printf("%s", get_next_line(fd));
+// 	printf("%s", get_next_line(fd));
+// 	printf("%s", get_next_line(fd));
+// 	printf("%s", get_next_line(fd));
+// 	printf("%s", get_next_line(fd));
+// 	printf("%s", get_next_line(fd));
+// 	return (0);
+// }
