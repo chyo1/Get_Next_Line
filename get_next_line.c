@@ -6,159 +6,178 @@
 /*   By: hyowchoi <hyowchoi@student.42seoul.kr>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/16 13:32:19 by hyowchoi          #+#    #+#             */
-/*   Updated: 2023/10/24 19:31:56 by hyowchoi         ###   ########.fr       */
+/*   Updated: 2023/10/25 16:42:44 by hyowchoi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-int	ft_realloc(t_list *root)
+int	make_root(t_list **root, size_t buf_size)
 {
-	char	*tmp;
-	ssize_t	idx;
-
-	idx = 0;
-	root->con_size *= 2;
-	tmp = (char *)malloc(sizeof(char) * (root->con_size));
-	if (!tmp)
+	if (*root)
+		return (1);
+	*root = (t_list *)malloc(sizeof(t_list));
+	if (!root)
 		return (0);
-	while (idx < root->fill)
+	(*root)->str = (char *)malloc(sizeof(char) * buf_size);
+	if (!((*root)->str))
 	{
-		tmp[idx] = (root->content)[idx];
-		idx++;
+		free(*root);
+		*root = 0;
+		return (0);
 	}
-	if (root->content)
-		free(root->content);
-	root->content = tmp;
+	(*root)->len = 0;
+	(*root)->size = buf_size;
+	(*root)->loc = 0;
 	return (1);
 }
 
-size_t	ft_strcat(t_list *node, char *buff, size_t cnt)
-{
-	size_t	idx;
-	ssize_t	loc;
-
-	loc = -1;
-	idx = 0;
-	while (idx < cnt)
-	{
-		(node->content)[node->fill + idx] = buff[idx];
-		if ((node->content)[node->fill + idx] == '\n' && loc == -1)
-			loc = node->fill + idx;
-		idx++;
-	}
-	node->fill += cnt;
-	return (loc);
-}
-
-void	find_endl(t_list *node)
+int	find_endl(t_list *root, ssize_t cnt, ssize_t buf_size)
 {
 	ssize_t	idx;
 
 	idx = 0;
-	node->loc = -1;
-	while (idx < node->fill)
+	while (idx < root->len)
 	{
-		if ((node->content)[idx] == '\n' || (node->content)[idx] == EOF)
+		if ((root->str)[idx] == '\n')
 		{
-			node->loc = idx;
-			return ;
+			root->loc = idx + 1;
+			return (1);
 		}
 		idx++;
 	}
+	if (cnt != buf_size)
+	{
+		root->loc = root->len;
+		return (1);
+	}
+	root->loc = -1;
+	return (0);
 }
 
-char	*strcut_n_cpy(t_list *node, char **res)
+int	cpy_buff(t_list **node, char *buff, ssize_t cnt)
 {
 	char	*tmp;
 	ssize_t	idx;
 
-	if (node->loc == -1)
-		node->loc = node->fill;
-	tmp = (char *)malloc(sizeof(char) * (node->loc + 1));
-	if (!tmp)
-		return (0);
-	idx = -1;
-	while (++idx <= node->loc)
-		tmp[idx] = (node->content)[idx];
-	*res = tmp;
-	tmp = (char *)malloc(sizeof(char) * (node->fill - node->loc));
-	if (!tmp)
-		return (0);
-	idx = 1;
-	while (idx + node->loc < node->fill)
+	idx = 0;
+	if ((*node)->size < (*node)->len + cnt)
 	{
-		tmp[idx - 1] = (node->content)[node->loc + idx];
+		(*node)->size *= 2;
+		tmp = (char *)malloc(sizeof(char) * (*node)->size);
+		if (!tmp)
+		{
+			free((*node)->str);
+			free(*node);
+			*node = 0;
+			return (0);
+		}
+		while (idx < (*node)->len)
+		{
+			tmp[idx] = (*node)->str[idx];
+			idx++;
+		}
+		free((*node)->str);
+		(*node)->str = tmp;
+	}
+	idx = 0;
+	while (idx < cnt)
+	{
+		(*node)->str[(*node)->len + idx] = buff[idx];
 		idx++;
 	}
-	free(node->content);
-	node->content = tmp;
-	return (*res);
+	(*node)->len += cnt;
+	return (1);
 }
 
-//0123\n56789
+
+// 0123\n567
+char	*get_ans(t_list **root)
+{
+	char	*ans;
+	char	*tmp;
+	ssize_t	idx;
+
+	idx = 0;
+	ans = (char *)malloc(sizeof(char) * ((*root)->loc));
+	if (!ans)
+	{
+		free((*root)->str);
+		free(*root);
+		*root = 0;
+		return (0);
+	}
+	while (idx <= (*root)->loc)
+	{
+		ans[idx] = (*root)->str[idx];
+		idx++;
+	}
+	tmp = (char *)malloc(sizeof(char) * ((*root)->len - (*root)->loc));
+	if (!tmp)
+	{
+		free((*root)->str);
+		free(*root);
+		free(ans);
+		*root = 0;
+		return (0);
+	}
+	idx = (*root)->loc;
+	while (idx < (*root)->len)
+	{
+		tmp[idx - (*root)->loc] = (*root)->str[idx];
+		idx++;
+	}
+	free((*root)->str);
+	(*root)->str = tmp;
+	(*root)->len -= (*root)->loc;
+	return (ans);
+}
 
 char	*get_next_line(int fd)
 {
 	char			buff[BUFFER_SIZE];
 	static t_list	*root;
-	char			*res;
 	ssize_t			cnt;
 
-	if (fd < 0 || fd == 2)
+	if (fd < 0 || fd == 2 || !make_root(&root, BUFFER_SIZE))
 		return (0);
-	if (!root)
-	{
-		root = (t_list *)malloc(sizeof(t_list));
-		if (!root)
-			return (0);
-		root->con_size = BUFFER_SIZE;
-		root->fill = 0;
-		root->content = 0;
-		if (!ft_realloc(root))
-		{
-			free(root);
-			return (0);
-		}
-	}
 	while (1)
 	{
 		cnt = read(fd, buff, BUFFER_SIZE);
-		if (cnt == -1 && root != 0)
+		if (cnt < 0)
 		{
-			free(root->content);
+			free(root->str);
 			free(root);
+			root = 0;
 			return (0);
 		}
-		if (root->con_size < root->fill + cnt)
-		{
-			if (!ft_realloc(root))
-			{
-				free(root->content);
-				free(root);
-				return (0);
-			}
-		}
-		ft_strcat(root, buff, cnt);
-		find_endl(root);
-		if (root->loc >= 0)
+		else if (cnt == 0)
 			break ;
+		if (!cpy_buff(&root, buff, cnt))
+			return (0);
+		if (find_endl(root, cnt, BUFFER_SIZE))
+		{
+			return (get_ans(&root));
+		}
 	}
-	if (!strcut_n_cpy(root, &res))
+	if (!root->len)
 	{
+		free(root->str);
 		free(root);
+		root = 0;
 		return (0);
 	}
-	return (res);
+	find_endl(root, cnt, BUFFER_SIZE);
+	return (get_ans(&root));
 }
 
 // #include <fcntl.h>
 
 // int main()
 // {
-// 	//int fd = open("text.txt", O_RDONLY);
+// 	int fd = open("test.txt", O_RDONLY);
 
-//  	printf("%s", get_next_line(1234252435));
+// 	printf("%s", get_next_line(fd));
 // 	// printf("%s", get_next_line(fd));
 // 	// printf("%s", get_next_line(fd));
 // 	// printf("%s", get_next_line(fd));
@@ -171,6 +190,6 @@ char	*get_next_line(int fd)
 // 	// printf("%s", get_next_line(fd));
 // 	// printf("%s", get_next_line(fd));
 // 	// printf("%s", get_next_line(fd));
-// 	// printf("%s", get_next_line(fd));
+	// printf("%s", get_next_line(fd));
 // 	return (0);
 // }
