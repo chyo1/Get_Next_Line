@@ -6,13 +6,13 @@
 /*   By: hyowchoi <hyowchoi@student.42seoul.kr>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/16 13:32:19 by hyowchoi          #+#    #+#             */
-/*   Updated: 2023/10/25 20:11:21 by hyowchoi         ###   ########.fr       */
+/*   Updated: 2023/10/26 21:16:30 by hyowchoi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-int	find_endl(t_list *node, ssize_t cnt, ssize_t buf_size)
+int	find_endl(t_list *node, ssize_t cnt)
 {
 	ssize_t	idx;
 
@@ -26,7 +26,7 @@ int	find_endl(t_list *node, ssize_t cnt, ssize_t buf_size)
 		}
 		idx++;
 	}
-	if (cnt != buf_size)
+	if (cnt != BUFFER_SIZE)
 	{
 		node->loc = node->len;
 		return (1);
@@ -58,7 +58,7 @@ int	cpy_buff(t_list *node, char *buff, ssize_t cnt)
 	}
 	idx = -1;
 	while (++idx < cnt)
-		node->str[node->len + idx] = buff[idx]; //
+		(node->str)[node->len + idx] = buff[idx]; //
 	node->len += cnt;
 	return (1);
 }
@@ -97,45 +97,56 @@ char	*get_next_line(int fd)
 	t_list			*node;
 	ssize_t			cnt;
 
+	// fd error
 	if (fd < 0 || fd == 2)
 		return (0);
-	node = find_or_make_lst(root, fd, BUFFER_SIZE);
+	// 리스트에서 해당 fd를 가진 node 탐색
+	node = find_or_make_lst(&root, fd);
+	// node malloc error
 	if (!node)
 		return (list_free_and_connect(&root, fd));
 	while (1)
 	{
 		cnt = read(fd, buff, BUFFER_SIZE);
-		// read error
+		// read(fd) error
 		if (cnt < 0)
 			return (list_free_and_connect(&root, fd));
+		// 읽을 게 없음
 		else if (cnt == 0)
 			break ;
 		// buff 내용 복사하려고 str 할당하는 것 실패
 		if (!cpy_buff(node, buff, cnt))
 			return (list_free_and_connect(&root, fd));
 		// 지금까지 받은 문자열에 개행 or EOF 없음
-		if (find_endl(root, cnt, BUFFER_SIZE))
+		if (find_endl(node, cnt))
 			return (get_ans(&root, node));
 	}
 	// 빈 파일 읽었을 때
 	if (!node->len)
 		return (list_free_and_connect(&root, fd));
 	// 다시 읽은 게 없지만, 전에 읽은 게 남아 있을 때
-	find_endl(root, cnt, BUFFER_SIZE);
+	find_endl(node, cnt);
 	return (get_ans(&root, node));
 }
 
 // int main()
 // {
-// 	int fd = open("test.txt", O_RDONLY);
+// 	int fd1 = open("test.txt", O_RDONLY);
+// 	int fd2 = open("test.txt", O_RDONLY);
+// 	int fd3 = open("test.txt", O_RDONLY);
 
-// 	printf("%s", get_next_line(fd));
-// 	printf("%s", get_next_line(fd));
-// 	printf("%s", get_next_line(fd));
-// 	printf("%s", get_next_line(fd));
-// 	printf("%s", get_next_line(fd));
-// 	printf("%s", get_next_line(fd));
-// 	printf("%s", get_next_line(fd));
-// 	printf("%s", get_next_line(fd));
+// 	printf("%s", get_next_line(fd1));
+// 	printf("%s", get_next_line(fd2));
+// 	printf("%s", get_next_line(fd3));
+// 	printf("%s", get_next_line(fd1));
+// 	printf("%s", get_next_line(fd2));
+// 	printf("%s", get_next_line(fd2)); //
+// 	printf("%s", get_next_line(fd2)); //
+// 	printf("%s", get_next_line(fd2)); //
+// 	printf("%s", get_next_line(fd2)); //
+// 	printf("%s", get_next_line(fd2)); //
+// 	printf("%s", get_next_line(fd2)); //
+// // 	printf("%s", get_next_line(1000));
+// // 	printf("%s", get_next_line(1221));
 // 	return (0);
 // }

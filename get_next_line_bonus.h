@@ -1,17 +1,17 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line.h                                    :+:      :+:    :+:   */
+/*   get_next_line_bonus.h                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: hyowchoi <hyowchoi@student.42seoul.kr>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/16 13:32:49 by hyowchoi          #+#    #+#             */
-/*   Updated: 2023/10/26 19:30:38 by hyowchoi         ###   ########.fr       */
+/*   Updated: 2023/10/26 19:31:01 by hyowchoi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef GET_NEXT_LINE_H
-# define GET_NEXT_LINE_H
+#ifndef GET_NEXT_LINE_BONUS_H
+# define GET_NEXT_LINE_BONUS_H
 
 # ifndef BUFFER_SIZE
 #  define BUFFER_SIZE 2048
@@ -41,4 +41,5 @@ t_list	*find_or_make_lst(t_list **root, int fd);
 int		init_node(t_list *node, int fd);
 void	ft_lstadd_back(t_list **lst, t_list *new_node);
 char	*list_free_and_connect(t_list **lst, int fd);
+
 #endif
