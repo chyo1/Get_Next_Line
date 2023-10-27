@@ -6,7 +6,7 @@
 /*   By: hyowchoi <hyowchoi@student.42seoul.kr>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/16 13:32:35 by hyowchoi          #+#    #+#             */
-/*   Updated: 2023/10/26 21:16:35 by hyowchoi         ###   ########.fr       */
+/*   Updated: 2023/10/27 13:48:45 by hyowchoi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@ t_list	*find_or_make_lst(t_list **root, int fd)
 {
 	t_list	*node;
 
+	// 리스트의 첫 주소값 할당
 	node = *root;
 	while (node)
 	{
@@ -26,11 +27,14 @@ t_list	*find_or_make_lst(t_list **root, int fd)
 	node = (t_list *)malloc(1 * sizeof(t_list));
 	if (!node)
 		return (0);
+
+	// node 초기화 (str 할당) 실패 시
 	if (!init_node(node, fd))
 	{
 		free(node);
 		return (0);
 	}
+	// 리스트에 연결
 	ft_lstadd_back(root, node);
 	return (node);
 }
@@ -74,7 +78,7 @@ char	*list_free_and_connect(t_list **lst, int fd)
 	bef = *lst;
 	now = *lst;
 
-	// only 1 node in list
+	// lst에 node가 하나밖에 없을 때
 	if (now->next == 0)
 		*lst = 0;
 	else
@@ -84,13 +88,14 @@ char	*list_free_and_connect(t_list **lst, int fd)
 			bef = now;
 			now = now->next;
 		}
+		// 삭제한 노드 앞 뒤 연결해주기
 		bef->next = now->next;
 	}
-	// delete first node
+
+	// 첫 번째 노드 삭제 시 root와 2번째 주소 연결
 	if (bef == now)
 		*lst = now->next;
 	free(now->str);
 	free(now);
 	return (0);
 }
-// 1 2 3

@@ -6,11 +6,11 @@
 /*   By: hyowchoi <hyowchoi@student.42seoul.kr>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/16 13:32:35 by hyowchoi          #+#    #+#             */
-/*   Updated: 2023/10/26 21:14:28 by hyowchoi         ###   ########.fr       */
+/*   Updated: 2023/10/27 13:32:46 by hyowchoi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "get_next_line.h"
+#include "get_next_line_bonus.h"
 
 t_list	*find_or_make_lst(t_list **root, int fd)
 {
@@ -73,8 +73,6 @@ char	*list_free_and_connect(t_list **lst, int fd)
 
 	bef = *lst;
 	now = *lst;
-
-	// only 1 node in list
 	if (now->next == 0)
 		*lst = 0;
 	else
@@ -86,11 +84,9 @@ char	*list_free_and_connect(t_list **lst, int fd)
 		}
 		bef->next = now->next;
 	}
-	// delete first node
 	if (bef == now)
 		*lst = now->next;
 	free(now->str);
 	free(now);
 	return (0);
 }
-// 1 2 3

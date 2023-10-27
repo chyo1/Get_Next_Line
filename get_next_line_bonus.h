@@ -6,7 +6,7 @@
 /*   By: hyowchoi <hyowchoi@student.42seoul.kr>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/16 13:32:49 by hyowchoi          #+#    #+#             */
-/*   Updated: 2023/10/26 19:31:01 by hyowchoi         ###   ########.fr       */
+/*   Updated: 2023/10/27 13:32:25 by hyowchoi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,6 @@
 
 # include <stdlib.h>
 # include <unistd.h>
-# include <stdio.h> //
-#include <fcntl.h> //
 
 typedef struct s_list
 {
